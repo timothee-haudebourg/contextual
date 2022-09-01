@@ -95,7 +95,7 @@ pub trait DisplayWithContext<C: ?Sized> {
 	fn fmt_with(&self, context: &C, f: &mut fmt::Formatter) -> fmt::Result;
 }
 
-impl<'a, T: DisplayWithContext<C>, C> DisplayWithContext<C> for &'a T {
+impl<'a, T: DisplayWithContext<C> + ?Sized, C> DisplayWithContext<C> for &'a T {
 	fn fmt_with(&self, context: &C, f: &mut fmt::Formatter) -> fmt::Result {
 		T::fmt_with(*self, context, f)
 	}
