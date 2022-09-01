@@ -65,7 +65,7 @@ impl<T, C> std::ops::DerefMut for Contextual<T, C> {
 	}
 }
 
-impl<'t, 'c, T: DisplayWithContext<C> + ?Sized, C> fmt::Display for Contextual<&'t T, &'c C> {
+impl<'c, T: DisplayWithContext<C>, C> fmt::Display for Contextual<T, &'c C> {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
 		self.0.fmt_with(self.1, f)
 	}
@@ -93,6 +93,12 @@ impl<'t, 'c, T: AsRefWithContext<U, C> + ?Sized, U: ?Sized, C> AsRef<U>
 
 pub trait DisplayWithContext<C: ?Sized> {
 	fn fmt_with(&self, context: &C, f: &mut fmt::Formatter) -> fmt::Result;
+}
+
+impl<'a, T: DisplayWithContext<C>, C> DisplayWithContext<C> for &'a T {
+	fn fmt_with(&self, context: &C, f: &mut fmt::Formatter) -> fmt::Result {
+		T::fmt_with(*self, context, f)
+	}
 }
 
 pub trait AsRefWithContext<U: ?Sized, C: ?Sized> {
