@@ -65,14 +65,20 @@ impl<T, C> std::ops::DerefMut for Contextual<T, C> {
 	}
 }
 
-impl<'c, T: DisplayWithContext<C>, C> fmt::Display for Contextual<T, &'c C> {
+impl<T: DisplayWithContext<C::Target>, C: std::ops::Deref> fmt::Display for Contextual<T, C> {
 	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		self.0.fmt_with(self.1, f)
+		self.0.fmt_with(self.1.deref(), f)
 	}
 }
 
 impl<'a, T: AsRefWithContext<str, C> + ?Sized, C: ?Sized> Contextual<&'a T, &'a C> {
 	pub fn as_str(&self) -> &'a str {
+		self.0.as_ref_with(self.1)
+	}
+}
+
+impl<'a, T: AsRefWithContext<str, C> + ?Sized, C: ?Sized> Contextual<&'a T, &'a mut C> {
+	pub fn as_str(&self) -> &str {
 		self.0.as_ref_with(self.1)
 	}
 }
@@ -83,8 +89,22 @@ impl<'a, T: IntoRefWithContext<'a, str, C>, C: ?Sized> Contextual<T, &'a C> {
 	}
 }
 
+impl<'a, T: IntoRefWithContext<'a, str, C>, C: ?Sized> Contextual<T, &'a mut C> {
+	pub fn into_str(self) -> &'a str {
+		self.0.into_ref_with(self.1)
+	}
+}
+
 impl<'t, 'c, T: AsRefWithContext<U, C> + ?Sized, U: ?Sized, C> AsRef<U>
 	for Contextual<&'t T, &'c C>
+{
+	fn as_ref(&self) -> &U {
+		self.0.as_ref_with(self.1)
+	}
+}
+
+impl<'t, 'c, T: AsRefWithContext<U, C> + ?Sized, U: ?Sized, C> AsRef<U>
+	for Contextual<&'t T, &'c mut C>
 {
 	fn as_ref(&self) -> &U {
 		self.0.as_ref_with(self.1)
