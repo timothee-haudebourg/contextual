@@ -121,6 +121,14 @@ impl<'a, T: DisplayWithContext<C> + ?Sized, C> DisplayWithContext<C> for &'a T {
 	}
 }
 
+impl<'a, T: DisplayWithContext<C> + std::borrow::ToOwned + ?Sized, C> DisplayWithContext<C>
+	for std::borrow::Cow<'a, T>
+{
+	fn fmt_with(&self, context: &C, f: &mut fmt::Formatter) -> fmt::Result {
+		T::fmt_with(self, context, f)
+	}
+}
+
 pub trait AsRefWithContext<U: ?Sized, C: ?Sized> {
 	fn as_ref_with<'a>(&'a self, context: &'a C) -> &'a U;
 }

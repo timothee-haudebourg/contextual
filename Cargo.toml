@@ -1,6 +1,6 @@
 [package]
 name = "contextual"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 authors = ["Timothée Haudebourg <author@haudebourg.net>"]
 description = "Utility crate to deal with data in context"
@@ -10,5 +10,3 @@ repository = "https://github.com/timothee-haudebourg/contextual"
 documentation = "https://docs.rs/contextual"
 license = "MIT/Apache-2.0"
 readme = "README.md"
-
-[dependencies]
