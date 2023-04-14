@@ -1,4 +1,4 @@
-use crate::{FromWithContext, IntoWithContext};
+use crate::IntoWithContext;
 
 pub trait TryFromWithContext<U, C>: Sized {
 	type Error;
@@ -6,11 +6,11 @@ pub trait TryFromWithContext<U, C>: Sized {
 	fn try_from_with(value: U, context: &C) -> Result<Self, Self::Error>;
 }
 
-impl<T: FromWithContext<U, C>, U, C> TryFromWithContext<U, C> for T {
+impl<T, U: IntoWithContext<T, C>, C> TryFromWithContext<U, C> for T {
 	type Error = std::convert::Infallible;
 
 	fn try_from_with(value: U, context: &C) -> Result<Self, Self::Error> {
-		Ok(T::from_with(value, context))
+		Ok(value.into_with(context))
 	}
 }
 
@@ -20,10 +20,10 @@ pub trait TryIntoWithContext<U, C> {
 	fn try_into_with(self, context: &C) -> Result<U, Self::Error>;
 }
 
-impl<T: IntoWithContext<U, C>, U, C> TryIntoWithContext<U, C> for T {
-	type Error = std::convert::Infallible;
+impl<T, U: TryFromWithContext<T, C>, C> TryIntoWithContext<U, C> for T {
+	type Error = U::Error;
 
 	fn try_into_with(self, context: &C) -> Result<U, Self::Error> {
-		Ok(self.into_with(context))
+		U::try_from_with(self, context)
 	}
 }

@@ -1,6 +1,6 @@
 [package]
 name = "contextual"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 authors = ["Timothée Haudebourg <author@haudebourg.net>"]
 description = "Utility crate to deal with data in context"
