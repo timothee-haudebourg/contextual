@@ -26,7 +26,17 @@
 //! print!("index: {}", i.with(&context));
 //! assert_eq!(*i.with(&context).as_ref(), "b")
 //! ```
-use std::fmt;
+mod as_ref;
+mod display;
+mod from;
+mod into_ref;
+mod try_from;
+
+pub use as_ref::*;
+pub use display::*;
+pub use from::*;
+pub use into_ref::*;
+pub use try_from::*;
 
 pub struct Contextual<T, C>(pub T, pub C);
 
@@ -63,76 +73,4 @@ impl<T, C> std::ops::DerefMut for Contextual<T, C> {
 	fn deref_mut(&mut self) -> &mut T {
 		&mut self.0
 	}
-}
-
-impl<T: DisplayWithContext<C::Target>, C: std::ops::Deref> fmt::Display for Contextual<T, C> {
-	fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-		self.0.fmt_with(self.1.deref(), f)
-	}
-}
-
-impl<'a, T: AsRefWithContext<str, C> + ?Sized, C: ?Sized> Contextual<&'a T, &'a C> {
-	pub fn as_str(&self) -> &'a str {
-		self.0.as_ref_with(self.1)
-	}
-}
-
-impl<'a, T: AsRefWithContext<str, C> + ?Sized, C: ?Sized> Contextual<&'a T, &'a mut C> {
-	pub fn as_str(&self) -> &str {
-		self.0.as_ref_with(self.1)
-	}
-}
-
-impl<'a, T: IntoRefWithContext<'a, str, C>, C: ?Sized> Contextual<T, &'a C> {
-	pub fn into_str(self) -> &'a str {
-		self.0.into_ref_with(self.1)
-	}
-}
-
-impl<'a, T: IntoRefWithContext<'a, str, C>, C: ?Sized> Contextual<T, &'a mut C> {
-	pub fn into_str(self) -> &'a str {
-		self.0.into_ref_with(self.1)
-	}
-}
-
-impl<'t, 'c, T: AsRefWithContext<U, C> + ?Sized, U: ?Sized, C> AsRef<U>
-	for Contextual<&'t T, &'c C>
-{
-	fn as_ref(&self) -> &U {
-		self.0.as_ref_with(self.1)
-	}
-}
-
-impl<'t, 'c, T: AsRefWithContext<U, C> + ?Sized, U: ?Sized, C> AsRef<U>
-	for Contextual<&'t T, &'c mut C>
-{
-	fn as_ref(&self) -> &U {
-		self.0.as_ref_with(self.1)
-	}
-}
-
-pub trait DisplayWithContext<C: ?Sized> {
-	fn fmt_with(&self, context: &C, f: &mut fmt::Formatter) -> fmt::Result;
-}
-
-impl<'a, T: DisplayWithContext<C> + ?Sized, C> DisplayWithContext<C> for &'a T {
-	fn fmt_with(&self, context: &C, f: &mut fmt::Formatter) -> fmt::Result {
-		T::fmt_with(*self, context, f)
-	}
-}
-
-impl<'a, T: DisplayWithContext<C> + std::borrow::ToOwned + ?Sized, C> DisplayWithContext<C>
-	for std::borrow::Cow<'a, T>
-{
-	fn fmt_with(&self, context: &C, f: &mut fmt::Formatter) -> fmt::Result {
-		T::fmt_with(self, context, f)
-	}
-}
-
-pub trait AsRefWithContext<U: ?Sized, C: ?Sized> {
-	fn as_ref_with<'a>(&'a self, context: &'a C) -> &'a U;
-}
-
-pub trait IntoRefWithContext<'a, U: ?Sized, C: ?Sized> {
-	fn into_ref_with(self, context: &'a C) -> &'a U;
 }
